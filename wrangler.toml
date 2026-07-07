@@ -1,0 +1,9 @@
+name = "sub230-backend"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sub230"
+database_id = "fc5ff425-643a-45b2-8575-6e466bd36c84"
