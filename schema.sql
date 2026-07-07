@@ -67,3 +67,39 @@ CREATE TABLE IF NOT EXISTS weekly_summaries (
   is_down_week INTEGER DEFAULT 0,
   computed_at TEXT DEFAULT (datetime('now'))
 );
+-- Session feedback from the athlete on individual runs
+CREATE TABLE IF NOT EXISTS session_feedback (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  activity_date TEXT NOT NULL,
+  activity_name TEXT,
+  strava_id INTEGER,
+  rating INTEGER,
+  notes TEXT,
+  recorded_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Athlete conditioning notes fed into plan generation
+CREATE TABLE IF NOT EXISTS athlete_notes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  notes TEXT NOT NULL,
+  recorded_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Body composition from InBody scans via Apple Health
+CREATE TABLE IF NOT EXISTS body_composition (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT UNIQUE NOT NULL,
+  weight_kg REAL,
+  body_fat_pct REAL,
+  lean_mass_kg REAL,
+  bmi REAL,
+  recorded_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Single-row config table for editable constants
+CREATE TABLE IF NOT EXISTS config (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  weekly_target_km REAL DEFAULT 104,
+  down_week_threshold_km REAL DEFAULT 80,
+  updated_at TEXT DEFAULT (datetime('now'))
+);

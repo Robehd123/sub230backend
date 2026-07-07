@@ -1,5 +1,5 @@
 /*
-  Sub 2:30 — Cloudflare Workers backend
+  Sub 2:30: Cloudflare Workers backend
   =======================================
   Routes:
     GET  /auth/strava          → redirect to Strava OAuth
@@ -444,7 +444,7 @@ function estimateVdot(recentRuns) {
   let source = "none";
 
   if (longRuns.length >= 2) {
-    // Use best (fastest) long run pace — most reliable unloaded signal
+    // Use best (fastest) long run pace, most reliable unloaded signal
     const paces = longRuns.map(r => r.moving_time_s / (r.distance_m / 1000));
     bestPaceSecKm = Math.min(...paces);
     source = "long";
@@ -555,7 +555,7 @@ async function generateWeeklyPlan(db, env, forceRegenerate = false, referenceDat
         `).bind(cached.generated_at, weekStart).first();
 
         if (!newActivity) return JSON.parse(cached.plan_json);
-        // new activity synced — fall through to regenerate
+        // new activity synced, fall through to regenerate
       }
     }
   }
@@ -693,7 +693,7 @@ async function generateWeeklyPlan(db, env, forceRegenerate = false, referenceDat
     const km = (a.distance_m / 1000).toFixed(1);
     const pace = a.distance_m > 0 ? Math.round(a.moving_time_s / (a.distance_m / 1000)) : 0;
     const paceStr = pace > 0 ? `${Math.floor(pace/60)}:${String(pace%60).padStart(2,"0")}/km` : "";
-    return `${dayName}: ${a.name} — ${km}km ${paceStr} ${a.average_hr ? `@ ${Math.round(a.average_hr)}bpm` : ""}`.trim();
+    return `${dayName}: ${a.name}, ${km}km ${paceStr} ${a.average_hr ? `@ ${Math.round(a.average_hr)}bpm` : ""}`.trim();
   });
   const thisWeekKm = thisWeekActivities.filter(a => isRunType(a.type)).reduce((s, a) => s + a.distance_m / 1000, 0);
 
@@ -726,39 +726,39 @@ ATHLETE CONDITIONING NOTES:
 ${athleteNotes?.length > 0 ? athleteNotes.map(n => `[${n.recorded_at?.split('T')[0] || ''}] ${n.notes}`).join('\n') : 'No notes logged'}
 
 RECENT SESSION FEEDBACK FROM ATHLETE:
-${recentFeedback?.length > 0 ? recentFeedback.map(f => `${f.activity_date} — ${f.activity_name || 'session'}: ${f.rating ? `${f.rating}/5` : ''} ${f.notes || ''}`).join('\n') : 'No recent feedback'}
+${recentFeedback?.length > 0 ? recentFeedback.map(f => `${f.activity_date} | ${f.activity_name || 'session'}: ${f.rating ? `${f.rating}/5` : ''} ${f.notes || ''}`).join('\n') : 'No recent feedback'}
 
 SESSIONS COMPLETED THIS WEEK SO FAR:
 ${completedThisWeek.length > 0 ? completedThisWeek.join('\n') : 'None yet this week'}
 
-MONDAY GYM SESSION — EXERCISE LIBRARY:
+MONDAY GYM SESSION: EXERCISE LIBRARY:
 Select from the following based on phase, week load, and what follows later in the week. Never prescribe exercises that would create so much DOMS that Tuesday track or Thursday treadmill is compromised.
 
-Barbell and compound (strength foundation — prioritise in base phase):
+Barbell and compound (strength foundation, prioritise in base phase):
 - Back squat, Trap-bar deadlift, Bulgarian split squat, Hip thrust
 
-Power and plyometric (running economy — increase in specific phase, use sparingly in base):
+Power and plyometric (running economy, increase in specific phase, use sparingly in base):
 - Trap-bar jump, Box jump, Pogo hops, Bounding
 
-Single-leg and supporting (injury resilience — always include at least one):
+Single-leg and supporting (injury resilience, always include at least one):
 - Single-leg Romanian deadlift, Box step-down, Nordic hamstring curl, Calf raises (straight and bent knee)
 
-Kettlebell (loaded movement variety — good for lower-intensity weeks):
+Kettlebell (loaded movement variety, good for lower-intensity weeks):
 - Kettlebell swing (two-handed), Single-arm kettlebell swing, Goblet squat, Kettlebell single-leg deadlift, Kettlebell reverse lunge, Loaded carries (suitcase and front rack)
 
-BOSU ball (stability and proprioception — good finisher or after injury niggles):
+BOSU ball (stability and proprioception, good finisher or after injury niggles):
 - BOSU single-leg balance, BOSU squat, BOSU split squat, BOSU calf raise, BOSU single-leg Romanian deadlift
 
 PRESCRIPTION PRINCIPLES:
 - Base phase: 2-3 compound lifts (3-4 sets, 5-8 reps at 70-80% 1RM) + 1-2 single-leg exercises + calf raises. Minimal plyometrics.
 - Specific phase: reduce compound volume, add 1-2 plyometric exercises (2-3 sets, 6-10 reps), maintain single-leg work.
 - Always include Nordic hamstring curls or single-leg RDL for hamstring resilience given the running load.
-- If TSB is negative (fatigued), reduce to kettlebell and BOSU work only — no heavy barbell loading.
+- If TSB is negative (fatigued), reduce to kettlebell and BOSU work only, no heavy barbell loading.
 - Calf raises (both straight and bent knee) should appear most weeks given the running volume.
 - Monday: Gym, leg session (prescribe if not yet done this week)
 - Tuesday morning: 10km easy commute run (fixed)
-- Tuesday evening: Club track — THIS WEEK'S SESSION: ${trackSession ? `"${trackSession}"` : "not yet published"}
-- Wednesday morning: 10km easy commute run (fixed, athlete commutes by running — always include this in the plan even though pace/structure is fixed)
+- Tuesday evening: Club track. THIS WEEK'S SESSION: ${trackSession ? `"${trackSession}"` : "not yet published"}
+- Wednesday morning: 10km easy commute run (fixed, athlete commutes by running, always include this in the plan even though pace/structure is fixed)
 - Wednesday evening: blocked
 - Thursday morning: Treadmill intervals (YOU PRESCRIBE)
 - Thursday evening: optional
@@ -767,7 +767,7 @@ PRESCRIPTION PRINCIPLES:
 - Saturday: YOU PRESCRIBE specifically for Saturday (long run OR easy recovery depending on week)
 - Sunday: YOU PRESCRIBE specifically for Sunday (the other of long run/easy recovery)
 
-IMPORTANT: Today is ${todayName}. Only prescribe sessions that have NOT yet happened this week. For sessions already completed, you may reference what was done when prescribing remaining sessions. Adjust remaining sessions based on what has actually been completed — if a session was missed or harder than planned, adapt accordingly.
+IMPORTANT: Today is ${todayName}. Only prescribe sessions that have NOT yet happened this week. For sessions already completed, you may reference what was done when prescribing remaining sessions. Adjust remaining sessions based on what has actually been completed. If a session was missed or harder than planned, adapt accordingly..
 
 Generate a training plan for the coming week. Respond ONLY with a valid JSON object, no markdown, no preamble, exactly this structure:
 
@@ -784,7 +784,7 @@ Generate a training plan for the coming week. Respond ONLY with a valid JSON obj
     },
     "tuesday": {
       "type": "intervals",
-      "title": "Club track — [session name/description]",
+      "title": "Club track: [session name/description]",
       "detail": ["the actual session as written by the coach", "any key notes from the sheet"],
       "rationale": "brief note on how to approach this specific session given current load"
     },
@@ -864,6 +864,32 @@ Generate a training plan for the coming week. Respond ONLY with a valid JSON obj
   return plan;
 }
 
+// ---- status computation ----
+// Returns a single status object consumed by the readiness gantry, the goal chip
+// and any status sentence. Deriving everything from one function makes contradiction
+// structurally impossible.
+function computeStatus(restHrDelta, tsb, latestNoteText) {
+  // Injury signal: check the latest journal note for common injury terms
+  const injuryTerms = ["strain", "pain", "injury", "injured", "niggle", "sore", "hurt", "hamstring", "calf", "achilles", "knee", "shin", "stress fracture"];
+  const noteHasInjury = latestNoteText
+    ? injuryTerms.some(t => latestNoteText.toLowerCase().includes(t))
+    : false;
+
+  if (noteHasInjury) {
+    return { word: "Caution", colour: "warn", detail: "Injury flagged in journal" };
+  }
+  if (restHrDelta !== null && restHrDelta > 5) {
+    return { word: "Hold", colour: "alert", detail: `Resting HR +${restHrDelta} vs baseline` };
+  }
+  if (restHrDelta !== null && restHrDelta > 2) {
+    return { word: "Caution", colour: "warn", detail: `Resting HR +${restHrDelta} vs baseline` };
+  }
+  if (tsb !== null && tsb < -15) {
+    return { word: "Caution", colour: "warn", detail: `TSB ${tsb}, high fatigue` };
+  }
+  return { word: "Ready", colour: "pos", detail: restHrDelta !== null ? `Resting HR on baseline` : "No HR data" };
+}
+
 // ---- dashboard data builder ----
 
 async function buildDashboardData(db) {
@@ -921,20 +947,24 @@ async function buildDashboardData(db) {
     ORDER BY start_date DESC LIMIT 5
   `).all();
 
-  // weekly streak: consecutive weeks with 3+ runs (rewards showing up, not just high volume)
+  // active weeks: weeks with 3+ runs OR 30km+ (honest metric for injury rebuilds)
+  // legacy streak: consecutive active weeks without a break (kept for backwards compat)
   const { results: allWeeks } = await db.prepare(`
     SELECT week_start, total_distance_km, run_count FROM weekly_summaries
     ORDER BY week_start DESC LIMIT 52
   `).all();
 
   let weekStreak = 0;
+  let activeWeeksCount = 0;
+  const weeksWindow = allWeeks.filter(w => w.week_start !== weekStart).slice(0, 12);
   for (const w of allWeeks) {
-    if (w.week_start === weekStart) continue; // skip current incomplete week
-    if ((w.run_count || 0) >= 3) {
-      weekStreak++;
-    } else {
-      break;
-    }
+    if (w.week_start === weekStart) continue;
+    const isActive = (w.run_count || 0) >= 3 || (w.total_distance_km || 0) >= 30;
+    if (isActive) { weekStreak++; } else { break; }
+  }
+  for (const w of weeksWindow) {
+    const isActive = (w.run_count || 0) >= 3 || (w.total_distance_km || 0) >= 30;
+    if (isActive) activeWeeksCount++;
   }
 
   // total minutes run this week
@@ -1059,6 +1089,12 @@ async function buildDashboardData(db) {
     if (cachedNext) nextWeekPlan = JSON.parse(cachedNext.plan_json);
   }
 
+  // compute unified status object (consumed by gantry and goal chip)
+  const latestNoteForStatus = (await db.prepare(
+    "SELECT notes FROM athlete_notes ORDER BY recorded_at DESC LIMIT 1"
+  ).first())?.notes || null;
+  const status = computeStatus(restHrDelta, load.tsb, latestNoteForStatus);
+
   return {
     week: {
       start: weekStart,
@@ -1067,8 +1103,11 @@ async function buildDashboardData(db) {
       isDownWeek: weeklyKm < 80,
       activities: weekActivities,
     },
+    // status: single source of truth for Ready/Caution/Hold across all UI surfaces
+    status,
+    activeWeeks: { active: activeWeeksCount, of: 12 },
     readiness: {
-      state: readinessState,
+      state: readinessState, // legacy field: "ready" | "steady" | "hold"
       restingHr: latestMetrics?.resting_hr || null,
       restHrDelta,
       hrBaseline: hrBaseline?.avg_hr || null,
