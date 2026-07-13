@@ -25,7 +25,7 @@
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
@@ -954,16 +954,16 @@ async function buildDashboardData(db) {
     ORDER BY week_start DESC LIMIT 52
   `).all();
 
-  let weekStreak = 0;
+let weekStreak = 0;
   let activeWeeksCount = 0;
   const weeksWindow = allWeeks.filter(w => w.week_start !== weekStart).slice(0, 12);
   for (const w of allWeeks) {
     if (w.week_start === weekStart) continue;
-    const isActive = (w.run_count || 0) >= 3 || (w.total_distance_km || 0) >= 30;
+    const isActive = (w.run_count || 0) >= 1 || (w.total_distance_km || 0) > 0;
     if (isActive) { weekStreak++; } else { break; }
   }
   for (const w of weeksWindow) {
-    const isActive = (w.run_count || 0) >= 3 || (w.total_distance_km || 0) >= 30;
+    const isActive = (w.run_count || 0) >= 1 || (w.total_distance_km || 0) > 0;
     if (isActive) activeWeeksCount++;
   }
 
@@ -1526,12 +1526,20 @@ export default {
       return json({ status: "ok" });
     }
 
-    if (path === "/api/feedback" && method === "GET") {
+   if (path === "/api/feedback" && method === "GET") {
       const { results } = await db.prepare(`
         SELECT * FROM session_feedback ORDER BY activity_date DESC LIMIT 10
       `).all();
       return json(results);
     }
+
+    // Delete feedback by id
+    if (path.startsWith("/api/feedback/") && method === "DELETE") {
+      const id = parseInt(path.split("/")[3]);
+      if (!id) return err("Invalid id");
+      await db.prepare("DELETE FROM session_feedback WHERE id = ?").bind(id).run();
+      return json({ status: "ok", deleted: id });
+    } 
 
     // Athlete notes: general conditioning log fed into plan generation
     if (path === "/api/notes" && method === "POST") {
@@ -1556,6 +1564,21 @@ export default {
         SELECT * FROM athlete_notes ORDER BY recorded_at DESC LIMIT 20
       `).all();
       return json(results);
+    }
+
+    // Delete a journal entry by id
+    if (path.startsWith("/api/notes/") && method === "DELETE") {
+      const id = parseInt(path.split("/")[3]);
+      if (!id) return err("Invalid id");
+      await db.prepare("DELETE FROM athlete_notes WHERE id = ?").bind(id).run();
+      // invalidate plan cache
+      const now2 = new Date();
+      const d2 = now2.getDay();
+      const mon2 = new Date(now2);
+      mon2.setDate(now2.getDate() - ((d2 + 6) % 7));
+      const ws2 = mon2.toISOString().split("T")[0];
+      await db.prepare("DELETE FROM weekly_plans WHERE week_start = ?").bind(ws2).run();
+      return json({ status: "ok", deleted: id });
     }
 
     // Body composition history
