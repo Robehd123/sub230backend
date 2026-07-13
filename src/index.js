@@ -782,7 +782,9 @@ PRESCRIPTION PRINCIPLES:
 - Saturday: YOU PRESCRIBE specifically for Saturday (long run OR easy recovery depending on week)
 - Sunday: YOU PRESCRIBE specifically for Sunday (the other of long run/easy recovery)
 
-IMPORTANT: Today is ${todayName}. Only prescribe sessions that have NOT yet happened this week. For sessions already completed, you may reference what was done when prescribing remaining sessions. Adjust remaining sessions based on what has actually been completed. If a session was missed or harder than planned, adapt accordingly..
+IMPORTANT: Today is ${todayName}. Only prescribe sessions that have NOT yet happened this week. For sessions already completed, you may reference what was done when prescribing remaining sessions. Adjust remaining sessions based on what has actually been completed. If a session was missed or harder than planned, adapt accordingly.
+
+TITLE RULE: Session titles must never contain the words "completed", "done", "finished", "already" or any reference to completion status. Titles describe the session only, for example "Easy commute run" or "Club track: threshold reps". Completion status must not appear in the title field under any circumstances.
 
 Generate a training plan for the coming week. Respond ONLY with a valid JSON object, no markdown, no preamble, exactly this structure:
 
