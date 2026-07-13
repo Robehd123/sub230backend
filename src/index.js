@@ -26,7 +26,7 @@
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Dashboard-Token",
 };
 
 function json(data, status = 200) {
@@ -38,6 +38,21 @@ function json(data, status = 200) {
 
 function err(msg, status = 400) {
   return json({ error: msg }, status);
+}
+
+// ---- auth check ----
+// Hashes the stored password with SHA-256 and compares to the header token.
+// Uses timing-safe comparison via string equality on hex digests.
+async function isAuthorised(request, env) {
+  if (!env.DASHBOARD_PASSWORD) return true; // if secret not set, allow all (dev mode)
+  const token = request.headers.get("X-Dashboard-Token");
+  if (!token) return false;
+  const encoder = new TextEncoder();
+  const data = encoder.encode(env.DASHBOARD_PASSWORD);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const expected = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+  return token === expected;
 }
 
 // ---- token management ----
@@ -1450,7 +1465,11 @@ export default {
 
       return json({ status: "ok", recorded });
     }
-
+// Auth check for all /api/ routes
+    if (path.startsWith("/api/")) {
+      const authorised = await isAuthorised(request, env);
+      if (!authorised) return json({ error: "Unauthorised" }, 401);
+    }
     // Dashboard API
     if (path === "/api/dashboard" && method === "GET") {
       const data = await buildDashboardData(db);
